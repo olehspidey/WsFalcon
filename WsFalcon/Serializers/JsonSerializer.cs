@@ -5,7 +5,7 @@ namespace WsFalcon.Serializers
 
     public class JsonSerializer : ISerializer
     {
-        public ArraySegment<byte> Serialize<TData>(TData data)
+        public ArraySegment<byte> Serialize<TData>(TData data, WebSocketContext wsContext)
             => System.Text.Json.JsonSerializer.SerializeToUtf8Bytes(data);
     }
 }

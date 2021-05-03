@@ -4,6 +4,6 @@ namespace WsFalcon.Serializers.Abstract
 
     public interface ISerializer
     {
-        ArraySegment<byte> Serialize<TData>(TData data);
+        ArraySegment<byte> Serialize<TData>(TData data, WebSocketContext wsContext);
     }
 }

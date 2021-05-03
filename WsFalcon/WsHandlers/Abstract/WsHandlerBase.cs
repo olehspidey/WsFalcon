@@ -6,13 +6,15 @@ namespace WsFalcon.WsHandlers.Abstract
     using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
-    using Microsoft.AspNetCore.Http;
     using Serializers.Abstract;
     using Storages.Abstract;
+    using WebSocketContext = WebSocketContext;
 
     public abstract class WsHandlerBase
     {
-        internal IWsStorage WsStorage { get; set; } = null!;
+        public WebSocketContext WsContext { get; internal set; } = null!;
+
+        internal IWsSessionStorage WsSessionStorage { get; set; } = null!;
 
         internal WebSocket CurrentWebSocket { get; set; } = null!;
 
@@ -25,7 +27,7 @@ namespace WsFalcon.WsHandlers.Abstract
             CancellationToken cancellationToken = default)
             => SendAsync(CurrentWebSocket, bytes, endOfMessage, messageType, cancellationToken);
 
-        public Task SendAsync(
+        public Task SendUtf8Async(
             string utf8TextMessage,
             bool endOfMessage = true,
             CancellationToken cancellationToken = default)
@@ -34,11 +36,11 @@ namespace WsFalcon.WsHandlers.Abstract
         public Task SendAsync<TData>(
             TData data,
             bool endOfMessage = true,
-            WebSocketMessageType messageType = WebSocketMessageType.Binary,
+            WebSocketMessageType messageType = WebSocketMessageType.Text,
             CancellationToken cancellationToken = default)
             => SendAsync(
                 CurrentWebSocket,
-                Serializer.Serialize(data),
+                Serializer.Serialize(data, WsContext),
                 endOfMessage,
                 messageType,
                 cancellationToken);
@@ -49,19 +51,19 @@ namespace WsFalcon.WsHandlers.Abstract
             WebSocketMessageType messageType = WebSocketMessageType.Binary,
             CancellationToken cancellationToken = default)
         {
-            var sendTasks = WsStorage
+            var sendTasks = WsSessionStorage
                 .GetWebSockets(GetType())
                 .Select(ws => SendAsync(ws, bytes, endOfMessage, messageType, cancellationToken));
 
             return Task.WhenAll(sendTasks);
         }
 
-        public Task BroadcastAsync(
+        public Task BroadcastUtf8Async(
             string utf8TextMessage,
             bool endOfMessage = true,
             CancellationToken cancellationToken = default)
         {
-            var sendTasks = WsStorage
+            var sendTasks = WsSessionStorage
                 .GetWebSockets(GetType())
                 .Select(ws => SendAsync(
                     ws,
@@ -73,11 +75,23 @@ namespace WsFalcon.WsHandlers.Abstract
             return Task.WhenAll(sendTasks);
         }
 
-        public virtual Task OnConnectedAsync(HttpContext httpContext)
+        public Task BroadcastAsync<TData>(
+            TData data,
+            bool endOfMessage = true,
+            WebSocketMessageType messageType = WebSocketMessageType.Text,
+            CancellationToken cancellationToken = default)
+        {
+            var sendTasks = WsSessionStorage
+                .GetWebSockets(GetType())
+                .Select(ws => SendAsync(ws, Serializer.Serialize(data, WsContext), endOfMessage, messageType, cancellationToken));
+
+            return Task.WhenAll(sendTasks);
+        }
+
+        public virtual Task OnConnectedAsync()
             => Task.CompletedTask;
 
         public virtual Task OnDisconnectedAsync(
-            HttpContext httpContext,
             WebSocketCloseStatus? webSocketCloseStatus,
             string wsCloseStatusDescription,
             Exception? exception)
@@ -85,7 +99,7 @@ namespace WsFalcon.WsHandlers.Abstract
 
         public abstract Task OnMessageAsync(ArraySegment<byte> message);
 
-        private Task SendAsync(
+        private static Task SendAsync(
             WebSocket webSocket,
             ArraySegment<byte> bytes,
             bool endOfMessage = true,
