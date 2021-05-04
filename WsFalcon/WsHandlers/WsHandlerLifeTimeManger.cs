@@ -48,7 +48,7 @@ namespace WsFalcon.WsHandlers
                     return;
                 }
 
-                await _wsHandler.OnMessageAsync(arrSegment[..receiveResult.Count]);
+                await _wsHandler.OnMessageAsync(arrSegment[..receiveResult.Count], receiveResult.EndOfMessage);
 
                 while (!webSocket.CloseStatus.HasValue)
                 {
@@ -61,7 +61,7 @@ namespace WsFalcon.WsHandlers
                         return;
                     }
 
-                    await _wsHandler.OnMessageAsync(arrSegment[..receiveResult.Count]);
+                    await _wsHandler.OnMessageAsync(arrSegment[..receiveResult.Count], receiveResult.EndOfMessage);
                 }
 
                 await OnDisconnectedAsync(webSocket.CloseStatus, webSocket.CloseStatusDescription);

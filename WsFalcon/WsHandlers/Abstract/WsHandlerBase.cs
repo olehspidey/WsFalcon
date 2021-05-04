@@ -169,8 +169,9 @@ namespace WsFalcon.WsHandlers.Abstract
         /// Callback method that invokes when new message is got.
         /// </summary>
         /// <param name="message">Binary message.</param>
+        /// <param name="endOfMessage">Indicates whether the message has been received completely.</param>
         /// <returns>The task object representing the asynchronous operation.</returns>
-        public abstract Task OnMessageAsync(ArraySegment<byte> message);
+        public abstract Task OnMessageAsync(ArraySegment<byte> message, bool endOfMessage);
 
         private static Task SendAsync(
             WebSocket webSocket,
