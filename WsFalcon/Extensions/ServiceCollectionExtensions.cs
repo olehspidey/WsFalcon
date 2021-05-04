@@ -1,7 +1,9 @@
 namespace WsFalcon.Extensions
 {
+    using System;
     using Builders;
     using Microsoft.Extensions.DependencyInjection;
+    using Options;
     using Serializers;
     using Serializers.Abstract;
     using Storages;
@@ -10,14 +12,17 @@ namespace WsFalcon.Extensions
 
     public static class ServiceCollectionExtensions
     {
-        public static WsFalconBuilder AddWsFalcon(this IServiceCollection serviceCollection)
+        public static WsFalconServiceBuilder AddWsFalcon(this IServiceCollection serviceCollection, Action<WsFalconOptions>? config = null)
         {
             serviceCollection
                 .AddSingleton<IWsSessionStorage, InMemoryWsSessionStorage>()
                 .AddSingleton<ISerializer, JsonSerializer>()
                 .AddScoped(typeof(WsHandlerLifeTimeManger<>));
 
-            return new WsFalconBuilder(serviceCollection);
+            if (config != null)
+                serviceCollection.Configure(config);
+
+            return new WsFalconServiceBuilder(serviceCollection);
         }
     }
 }
