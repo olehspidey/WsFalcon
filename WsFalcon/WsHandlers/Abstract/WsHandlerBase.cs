@@ -171,7 +171,8 @@ namespace WsFalcon.WsHandlers.Abstract
         /// <param name="message">Binary message.</param>
         /// <param name="endOfMessage">Indicates whether the message has been received completely.</param>
         /// <returns>The task object representing the asynchronous operation.</returns>
-        public abstract Task OnMessageAsync(ArraySegment<byte> message, bool endOfMessage);
+        public virtual Task OnMessageAsync(ArraySegment<byte> message, bool endOfMessage)
+            => Task.CompletedTask;
 
         private static Task SendAsync(
             WebSocket webSocket,
