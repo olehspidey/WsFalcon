@@ -8,17 +8,13 @@ namespace WsFalcon.WsHandlers
     using Abstract;
     using Managers.Abstract;
 
-    public class GroupClientSubmitter : IWsClientSubmitter
+    public class BroadcastClientSubmitter : IWsClientSubmitter
     {
-        private readonly string _groupName;
         private readonly IWsSessionsManager _wsSessionsManager;
-        private readonly IInternalGroupManager _groupManager;
 
-        public GroupClientSubmitter(string groupName, IWsSessionsManager wsSessionsManager, IInternalGroupManager groupManager)
+        public BroadcastClientSubmitter(IWsSessionsManager wsSessionsManager)
         {
-            _groupName = groupName;
             _wsSessionsManager = wsSessionsManager;
-            _groupManager = groupManager;
         }
 
         public Task SendAsync(
@@ -27,10 +23,13 @@ namespace WsFalcon.WsHandlers
             WebSocketMessageType messageType = WebSocketMessageType.Binary,
             CancellationToken cancellationToken = default)
         {
-            var connectionIds = _groupManager.GetConnectionIds(_groupName);
             var webSocketSessionsTasks = _wsSessionsManager
-                .GetWebSocketSessions(connectionIds)
-                .Select(wss => wss.WebSocket.SendAsync(bytes, messageType, endOfMessage, cancellationToken));
+                .GetWebSocketSessions()
+                .Select(session => session.WebSocket.SendAsync(
+                    bytes,
+                    messageType,
+                    endOfMessage,
+                    cancellationToken));
 
             return Task.WhenAll(webSocketSessionsTasks);
         }

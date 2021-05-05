@@ -3,7 +3,7 @@ namespace WsFalcon.Extensions
     using System;
     using Builders;
     using Managers;
-    using Managers.Abstract;
+    using Managers.Abstract.Generic;
     using Microsoft.Extensions.DependencyInjection;
     using Options;
     using Serializers;
@@ -15,7 +15,8 @@ namespace WsFalcon.Extensions
         public static WsFalconServiceBuilder AddWsFalcon(this IServiceCollection serviceCollection, Action<WsFalconOptions>? config = null)
         {
             serviceCollection
-                .AddSingleton<IWsSessionStorage, InMemoryWsSessionStorage>()
+                .AddSingleton(typeof(IWsSessionsManager<>), typeof(WsSessionsManager<>))
+                .AddSingleton(typeof(IInternalGroupManager<>), typeof(WsGroupManager<>))
                 .AddSingleton<ISerializer, JsonSerializer>()
                 .AddScoped(typeof(WsHandlerLifeTimeManger<>));
 

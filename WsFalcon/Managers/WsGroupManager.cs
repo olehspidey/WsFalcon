@@ -2,9 +2,9 @@ namespace WsFalcon.Managers
 {
     using System.Collections.Concurrent;
     using System.Collections.Generic;
-    using Abstract;
+    using Abstract.Generic;
 
-    public class WsGroupManager : IGroupManager
+    public class WsGroupManager<TWsHandler> : IInternalGroupManager<TWsHandler>
     {
         private readonly ConcurrentDictionary<string, HashSet<string>> _groups;
 
@@ -21,7 +21,7 @@ namespace WsFalcon.Managers
             }
             else
             {
-                _groups[groupName] = new HashSet<string> { groupName };
+                _groups[groupName] = new HashSet<string> { connectionId };
             }
         }
 
@@ -31,6 +31,14 @@ namespace WsFalcon.Managers
             {
                 conIds.Remove(connectionId);
             }
+        }
+
+        public IReadOnlyCollection<string> GetConnectionIds(string groupName)
+        {
+            if (_groups.TryGetValue(groupName, out var conIds))
+                return conIds;
+
+            return new List<string>();
         }
     }
 }

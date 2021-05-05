@@ -5,7 +5,7 @@ namespace WsFalcon.WsHandlers
     using System.Threading.Tasks;
     using Abstract;
     using Managers;
-    using Managers.Abstract;
+    using Managers.Abstract.Generic;
     using Microsoft.AspNetCore.Http;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;
@@ -20,7 +20,9 @@ namespace WsFalcon.WsHandlers
         private readonly TWsHandler _wsHandler;
         private readonly Type _wsHandlerType;
         private readonly ILogger<WsHandlerLifeTimeManger<TWsHandler>> _logger;
+        private readonly IWsSessionsManager<TWsHandler> _wsSessionsManager;
         private readonly int _bufferSize;
+        private WsSession? _wsSession;
 
         public WsHandlerLifeTimeManger(IServiceProvider serviceProvider)
         {
@@ -31,6 +33,7 @@ namespace WsFalcon.WsHandlers
                 .GetRequiredService<IOptions<WsFalconOptions>>()
                 .Value
                 .WsBufferSize ?? 1024 * 4;
+            _wsSessionsManager = serviceProvider.GetRequiredService<IWsSessionsManager<TWsHandler>>();
         }
 
         public async Task HandleSocketAccepted(WebSocket webSocket, HttpContext httpContext)
@@ -76,13 +79,17 @@ namespace WsFalcon.WsHandlers
 
         private Task OnConnectedAsync(HttpContext httpContext, WebSocket webSocket)
         {
+            var groupManager = httpContext.RequestServices.GetRequiredService<IInternalGroupManager<TWsHandler>>();
+            _wsSession = new WsSession(httpContext.Connection.Id, webSocket);
+
             _logger.LogInformation($"{_wsHandlerType.FullName} connected");
-            _wsHandler.CurrentWebSocket = webSocket;
-            _wsHandler.WsSessionStorage = httpContext.RequestServices.GetRequiredService<IWsSessionStorage>();
             _wsHandler.Serializer = httpContext.RequestServices.GetRequiredService<ISerializer>();
-            _wsHandler.WsSessionStorage.SaveWebSocketSession(_wsHandlerType, webSocket);
             _wsHandler.WsContext = new WebSocketContext(httpContext.Connection);
-            _wsHandler.Group = new WsGroupManager();
+            _wsHandler.Group = groupManager;
+            _wsHandler.Clients = new WsClients(
+                httpContext.RequestServices.GetRequiredService<IWsSessionsManager<TWsHandler>>(),
+                groupManager);
+            _wsSessionsManager.SaveWebSocketSession(_wsSession);
 
             return _wsHandler.OnConnectedAsync();
         }
@@ -93,7 +100,7 @@ namespace WsFalcon.WsHandlers
             Exception? exception = null)
         {
             _logger.LogInformation($"{_wsHandlerType.FullName} disconnected");
-            _wsHandler.WsSessionStorage.Delete(_wsHandlerType, _wsHandler.CurrentWebSocket);
+            _wsSessionsManager.Delete(_wsSession);
 
             return _wsHandler.OnDisconnectedAsync(webSocketCloseStatus, wsCloseStatusDescription, exception);
         }
