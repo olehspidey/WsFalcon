@@ -2,12 +2,12 @@ namespace WsFalcon.Extensions
 {
     using System;
     using Builders;
+    using Managers;
+    using Managers.Abstract;
     using Microsoft.Extensions.DependencyInjection;
     using Options;
     using Serializers;
     using Serializers.Abstract;
-    using Storages;
-    using Storages.Abstract;
     using WsHandlers;
 
     public static class ServiceCollectionExtensions

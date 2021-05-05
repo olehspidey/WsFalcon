@@ -4,13 +4,14 @@ namespace WsFalcon.WsHandlers
     using System.Net.WebSockets;
     using System.Threading.Tasks;
     using Abstract;
+    using Managers;
+    using Managers.Abstract;
     using Microsoft.AspNetCore.Http;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
     using Options;
     using Serializers.Abstract;
-    using Storages.Abstract;
     using WebSocketContext = WebSocketContext;
 
     public class WsHandlerLifeTimeManger<TWsHandler>
@@ -69,7 +70,7 @@ namespace WsFalcon.WsHandlers
             catch (Exception e)
             {
                 _logger.LogError(e, $"Receive message error for {_wsHandlerType.FullName}");
-                await OnDisconnectedAsync(webSocket.CloseStatus, webSocket.CloseStatusDescription);
+                await OnDisconnectedAsync(webSocket.CloseStatus, webSocket.CloseStatusDescription, e);
             }
         }
 
@@ -79,8 +80,9 @@ namespace WsFalcon.WsHandlers
             _wsHandler.CurrentWebSocket = webSocket;
             _wsHandler.WsSessionStorage = httpContext.RequestServices.GetRequiredService<IWsSessionStorage>();
             _wsHandler.Serializer = httpContext.RequestServices.GetRequiredService<ISerializer>();
-            _wsHandler.WsSessionStorage.SaveWebSocket(_wsHandlerType, webSocket);
+            _wsHandler.WsSessionStorage.SaveWebSocketSession(_wsHandlerType, webSocket);
             _wsHandler.WsContext = new WebSocketContext(httpContext.Connection);
+            _wsHandler.Group = new WsGroupManager();
 
             return _wsHandler.OnConnectedAsync();
         }

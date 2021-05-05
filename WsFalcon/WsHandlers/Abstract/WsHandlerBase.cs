@@ -6,8 +6,8 @@ namespace WsFalcon.WsHandlers.Abstract
     using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
+    using Managers.Abstract;
     using Serializers.Abstract;
-    using Storages.Abstract;
     using WebSocketContext = WebSocketContext;
 
     /// <summary>
@@ -24,6 +24,8 @@ namespace WsFalcon.WsHandlers.Abstract
         /// Gets data serializer. If it is not configured, will be used default json serializer.
         /// </summary>
         public ISerializer Serializer { get; internal set; } = null!;
+
+        public IGroupManager Group { get; internal set; } = null!;
 
         internal IWsSessionStorage WsSessionStorage { get; set; } = null!;
 
@@ -93,7 +95,7 @@ namespace WsFalcon.WsHandlers.Abstract
             CancellationToken cancellationToken = default)
         {
             var sendTasks = WsSessionStorage
-                .GetWebSockets(GetType())
+                .GetWebSocketSessions(GetType())
                 .Select(ws => SendAsync(ws, bytes, endOfMessage, messageType, cancellationToken));
 
             return Task.WhenAll(sendTasks);
@@ -112,7 +114,7 @@ namespace WsFalcon.WsHandlers.Abstract
             CancellationToken cancellationToken = default)
         {
             var sendTasks = WsSessionStorage
-                .GetWebSockets(GetType())
+                .GetWebSocketSessions(GetType())
                 .Select(ws => SendAsync(
                     ws,
                     new ArraySegment<byte>(Encoding.UTF8.GetBytes(utf8TextMessage)),
@@ -139,7 +141,7 @@ namespace WsFalcon.WsHandlers.Abstract
             CancellationToken cancellationToken = default)
         {
             var sendTasks = WsSessionStorage
-                .GetWebSockets(GetType())
+                .GetWebSocketSessions(GetType())
                 .Select(ws => SendAsync(ws, Serializer.Serialize(data, WsContext), endOfMessage, messageType, cancellationToken));
 
             return Task.WhenAll(sendTasks);
