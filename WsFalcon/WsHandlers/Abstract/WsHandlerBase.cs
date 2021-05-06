@@ -1,16 +1,17 @@
 namespace WsFalcon.WsHandlers.Abstract
 {
     using System;
+    using System.Diagnostics.CodeAnalysis;
     using System.Net.WebSockets;
     using System.Threading.Tasks;
     using Managers.Abstract;
-    using Managers.Abstract.Generic;
     using Serializers.Abstract;
     using WebSocketContext = WebSocketContext;
 
     /// <summary>
     /// Represents base implementation of web socket handler.
     /// </summary>
+    [SuppressMessage("ReSharper", "UnusedAutoPropertyAccessor.Global", Justification = "Properties will be used in implementation class")]
     public abstract class WsHandlerBase
     {
         /// <summary>

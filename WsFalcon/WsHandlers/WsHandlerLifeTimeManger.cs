@@ -100,7 +100,9 @@ namespace WsFalcon.WsHandlers
             Exception? exception = null)
         {
             _logger.LogInformation($"{_wsHandlerType.FullName} disconnected");
-            _wsSessionsManager.Delete(_wsSession);
+
+            if(_wsSession != null)
+                _wsSessionsManager.Delete(_wsSession);
 
             return _wsHandler.OnDisconnectedAsync(webSocketCloseStatus, wsCloseStatusDescription, exception);
         }
