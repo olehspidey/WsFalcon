@@ -20,7 +20,15 @@ namespace WsFalcon.Managers
             if (_groupToConIds.TryGetValue(groupName, out var conIds))
             {
                 conIds.Add(connectionId);
-                _conIdToGroups[connectionId].Add(groupName);
+
+                if (_conIdToGroups.TryGetValue(connectionId, out var groups))
+                {
+                    groups.Add(groupName);
+                }
+                else
+                {
+                    _conIdToGroups[connectionId] = new HashSet<string> { groupName };
+                }
             }
             else
             {
