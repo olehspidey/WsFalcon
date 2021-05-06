@@ -104,6 +104,8 @@ namespace WsFalcon.WsHandlers
             if(_wsSession != null)
                 _wsSessionsManager.Delete(_wsSession);
 
+            ((IInternalGroupManager<TWsHandler>)_wsHandler.Group).RemoveConnectionFromAllGroups(_wsHandler.WsContext.ConnectionInfo.Id);
+
             return _wsHandler.OnDisconnectedAsync(webSocketCloseStatus, wsCloseStatusDescription, exception);
         }
     }

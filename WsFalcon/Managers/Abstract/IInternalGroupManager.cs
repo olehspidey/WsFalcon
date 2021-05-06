@@ -5,5 +5,7 @@ namespace WsFalcon.Managers.Abstract
     public interface IInternalGroupManager : IGroupManager
     {
         IReadOnlyCollection<string> GetConnectionIds(string groupName);
+
+        void RemoveConnectionFromAllGroups(string connectionId);
     }
 }
