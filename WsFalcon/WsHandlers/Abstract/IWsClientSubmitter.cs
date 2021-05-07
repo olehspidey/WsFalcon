@@ -12,5 +12,14 @@ namespace WsFalcon.WsHandlers.Abstract
             bool endOfMessage = true,
             WebSocketMessageType messageType = WebSocketMessageType.Binary,
             CancellationToken cancellationToken = default);
+
+        Task SendAsync(
+            string utf8String,
+            CancellationToken cancellationToken = default);
+
+        Task SendDataAsync<TData>(
+            TData data,
+            WebSocketMessageType messageType = WebSocketMessageType.Binary,
+            CancellationToken cancellationToken = default);
     }
 }

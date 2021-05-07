@@ -1,38 +1,35 @@
 namespace WsFalcon.WsHandlers
 {
-    using System;
+    using System.Collections.Generic;
     using System.Linq;
     using System.Net.WebSockets;
-    using System.Threading;
-    using System.Threading.Tasks;
     using Abstract;
     using Managers.Abstract;
+    using Serializers.Abstract;
+    using WebSocketContext = WebSocketContext;
 
-    public class GroupClientSubmitter : IWsClientSubmitter
+    public class GroupClientSubmitter : WsSubmitter
     {
         private readonly string _groupName;
         private readonly IWsSessionsManager _wsSessionsManager;
         private readonly IInternalGroupManager _groupManager;
 
-        public GroupClientSubmitter(string groupName, IWsSessionsManager wsSessionsManager, IInternalGroupManager groupManager)
+        public GroupClientSubmitter(
+            string groupName,
+            IWsSessionsManager wsSessionsManager,
+            IInternalGroupManager groupManager,
+            ISerializer serializer,
+            WebSocketContext webSocketContext)
+            : base(serializer, webSocketContext)
         {
             _groupName = groupName;
             _wsSessionsManager = wsSessionsManager;
             _groupManager = groupManager;
         }
 
-        public Task SendAsync(
-            ArraySegment<byte> bytes,
-            bool endOfMessage = true,
-            WebSocketMessageType messageType = WebSocketMessageType.Binary,
-            CancellationToken cancellationToken = default)
-        {
-            var connectionIds = _groupManager.GetConnectionIds(_groupName);
-            var webSocketSessionsTasks = _wsSessionsManager
-                .GetWebSocketSessions(connectionIds)
-                .Select(wss => wss.WebSocket.SendAsync(bytes, messageType, endOfMessage, cancellationToken));
-
-            return Task.WhenAll(webSocketSessionsTasks);
-        }
+        protected override IEnumerable<WebSocket> WebSockets => _wsSessionsManager
+            .GetWebSocketSessions(_groupManager
+                .GetConnectionIds(_groupName))
+            .Select(wss => wss.WebSocket);
     }
 }

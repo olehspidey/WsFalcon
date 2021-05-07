@@ -1,37 +1,25 @@
 namespace WsFalcon.WsHandlers
 {
-    using System;
+    using System.Collections.Generic;
     using System.Linq;
     using System.Net.WebSockets;
-    using System.Threading;
-    using System.Threading.Tasks;
     using Abstract;
     using Managers.Abstract;
+    using Serializers.Abstract;
+    using WebSocketContext = WebSocketContext;
 
-    public class BroadcastClientSubmitter : IWsClientSubmitter
+    public class BroadcastClientSubmitter : WsSubmitter
     {
         private readonly IWsSessionsManager _wsSessionsManager;
 
-        public BroadcastClientSubmitter(IWsSessionsManager wsSessionsManager)
+        public BroadcastClientSubmitter(IWsSessionsManager wsSessionsManager, ISerializer serializer, WebSocketContext webSocketContext)
+            : base(serializer, webSocketContext)
         {
             _wsSessionsManager = wsSessionsManager;
         }
 
-        public Task SendAsync(
-            ArraySegment<byte> bytes,
-            bool endOfMessage = true,
-            WebSocketMessageType messageType = WebSocketMessageType.Binary,
-            CancellationToken cancellationToken = default)
-        {
-            var webSocketSessionsTasks = _wsSessionsManager
-                .GetWebSocketSessions()
-                .Select(session => session.WebSocket.SendAsync(
-                    bytes,
-                    messageType,
-                    endOfMessage,
-                    cancellationToken));
-
-            return Task.WhenAll(webSocketSessionsTasks);
-        }
+        protected override IEnumerable<WebSocket> WebSockets => _wsSessionsManager
+            .GetWebSocketSessions()
+            .Select(wss => wss.WebSocket);
     }
 }

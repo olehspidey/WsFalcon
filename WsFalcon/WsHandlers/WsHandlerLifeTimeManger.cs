@@ -88,7 +88,10 @@ namespace WsFalcon.WsHandlers
             _wsHandler.Group = groupManager;
             _wsHandler.Clients = new WsClients(
                 httpContext.RequestServices.GetRequiredService<IWsSessionsManager<TWsHandler>>(),
-                groupManager);
+                groupManager,
+                _wsHandler.WsContext,
+                _wsHandler.Serializer,
+                webSocket);
             _wsSessionsManager.SaveWebSocketSession(_wsSession);
 
             return _wsHandler.OnConnectedAsync();

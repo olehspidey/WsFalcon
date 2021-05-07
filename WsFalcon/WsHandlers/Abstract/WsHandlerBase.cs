@@ -20,9 +20,9 @@ namespace WsFalcon.WsHandlers.Abstract
         public WebSocketContext WsContext { get; internal set; } = null!;
 
         /// <summary>
-        /// Gets data serializer. If it is not configured, will be used default json serializer.
+        /// Gets or sets data serializer. If it is not configured, will be used default json serializer.
         /// </summary>
-        public ISerializer Serializer { get; internal set; } = null!;
+        public ISerializer Serializer { get; set; } = null!;
 
         public IGroupManager Group { get; internal set; } = null!;
 
