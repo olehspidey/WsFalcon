@@ -3,6 +3,7 @@ namespace WsFalcon.Managers
     using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
+    using System.Collections.ObjectModel;
     using System.Linq;
     using Abstract.Generic;
 
@@ -42,7 +43,7 @@ namespace WsFalcon.Managers
 
         public IReadOnlyCollection<WsSession> GetWebSocketSessions()
             => _wsSessions.TryGetValue(_handlerType, out var wss)
-                ? wss.Values.ToList()
+                ? wss.Values as ReadOnlyCollection<WsSession> ?? wss.Values.ToList().AsReadOnly()
                 : new HashSet<WsSession>();
 
         public IReadOnlyCollection<WsSession> GetWebSocketSessions(IReadOnlyCollection<string> connectionIds)

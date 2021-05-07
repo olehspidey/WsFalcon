@@ -1,4 +1,4 @@
-namespace WsFalcon.WsHandlers
+namespace WsFalcon.WsHandlers.WsSubmitters
 {
     using System.Collections.Generic;
     using System.Linq;
