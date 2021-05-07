@@ -8,18 +8,20 @@ namespace WsFalcon.WsHandlers.WsSubmitters
     using Serializers.Abstract;
     using WebSocketContext = WebSocketContext;
 
-    public class BroadcastClientSubmitter : WsSubmitterBase
+    public class OtherSubmitterBase : WsSubmitterBase
     {
         private readonly IWsSessionsManager _wsSessionsManager;
+        private readonly string _currentConId;
 
-        public BroadcastClientSubmitter(IWsSessionsManager wsSessionsManager, ISerializer serializer, WebSocketContext webSocketContext)
+        public OtherSubmitterBase(ISerializer serializer, WebSocketContext webSocketContext, IWsSessionsManager wsSessionsManager)
             : base(serializer, webSocketContext)
         {
             _wsSessionsManager = wsSessionsManager;
+            _currentConId = webSocketContext.ConnectionInfo.Id;
         }
 
         protected override IEnumerable<WebSocket> WebSockets => _wsSessionsManager
-            .GetWebSocketSessions()
+            .GetWebSocketSessionsInstead(session => session.ConnectionId == _currentConId)
             .Select(wss => wss.WebSocket);
     }
 }

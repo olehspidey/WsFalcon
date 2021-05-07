@@ -6,7 +6,7 @@ namespace WsFalcon.WsHandlers.WsSubmitters
     using Serializers.Abstract;
     using WebSocketContext = WsFalcon.WebSocketContext;
 
-    public class CallerSubmitter : WsSubmitter
+    public class CallerSubmitter : WsSubmitterBase
     {
         private readonly WebSocket _callerWs;
 

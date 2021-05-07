@@ -9,57 +9,40 @@ namespace WsFalcon.Managers
 
     public class WsSessionsManager<TWsHandler> : IWsSessionsManager<TWsHandler>
     {
-        private readonly ConcurrentDictionary<Type, ConcurrentDictionary<string, WsSession>> _wsSessions;
-        private readonly Type _handlerType;
+        private readonly ConcurrentDictionary<string, WsSession> _wsSessions;
 
         public WsSessionsManager()
         {
-            _wsSessions = new ConcurrentDictionary<Type, ConcurrentDictionary<string, WsSession>>();
-            _handlerType = typeof(TWsHandler);
+            _wsSessions = new ConcurrentDictionary<string, WsSession>();
         }
 
         public void SaveWebSocketSession(WsSession wsSession)
         {
-            if (_wsSessions.TryGetValue(_handlerType, out var wss))
-            {
-                wss[wsSession.ConnectionId] = wsSession;
-            }
-            else
-            {
-                _wsSessions[_handlerType] = new ConcurrentDictionary<string, WsSession>
-                {
-                    [wsSession.ConnectionId] = wsSession
-                };
-            }
+            _wsSessions[wsSession.ConnectionId] = wsSession;
         }
 
         public void Delete(WsSession wsSession)
         {
-            if (_wsSessions.TryGetValue(_handlerType, out var wss))
-            {
-                wss.TryRemove(wsSession.ConnectionId, out _);
-            }
+            _wsSessions.TryRemove(wsSession.ConnectionId, out _);
         }
 
         public IReadOnlyCollection<WsSession> GetWebSocketSessions()
-            => _wsSessions.TryGetValue(_handlerType, out var wss)
-                ? wss.Values as ReadOnlyCollection<WsSession> ?? wss.Values.ToList().AsReadOnly()
-                : new HashSet<WsSession>();
+            => _wsSessions.Values as ReadOnlyCollection<WsSession> ?? _wsSessions.Values.ToList().AsReadOnly();
 
         public IReadOnlyCollection<WsSession> GetWebSocketSessions(IReadOnlyCollection<string> connectionIds)
         {
             var result = new List<WsSession>(connectionIds.Count);
 
-            if (_wsSessions.TryGetValue(_handlerType, out var wss))
+            foreach (var connectionId in connectionIds)
             {
-                foreach (var connectionId in connectionIds)
-                {
-                    if (wss.TryGetValue(connectionId, out var wSession))
-                        result.Add(wSession);
-                }
+                if (_wsSessions.TryGetValue(connectionId, out var wSession))
+                    result.Add(wSession);
             }
 
             return result;
         }
+
+        public IReadOnlyCollection<WsSession> GetWebSocketSessionsInstead(Func<WsSession, bool> predicate)
+            => _wsSessions.Values.Where(session => !predicate(session)).ToList();
     }
 }

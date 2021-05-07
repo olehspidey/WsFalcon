@@ -10,12 +10,12 @@ namespace WsFalcon.WsHandlers.WsSubmitters.Abstract
     using Serializers.Abstract;
     using WebSocketContext = WebSocketContext;
 
-    public abstract class WsSubmitter : IWsClientSubmitter
+    public abstract class WsSubmitterBase : IWsClientSubmitter
     {
         private readonly ISerializer _serializer;
         private readonly WebSocketContext _webSocketContext;
 
-        protected WsSubmitter(ISerializer serializer, WebSocketContext webSocketContext)
+        protected WsSubmitterBase(ISerializer serializer, WebSocketContext webSocketContext)
         {
             _serializer = serializer;
             _webSocketContext = webSocketContext;

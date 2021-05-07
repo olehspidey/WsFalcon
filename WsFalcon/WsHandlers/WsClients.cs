@@ -6,7 +6,7 @@ namespace WsFalcon.WsHandlers
     using Serializers.Abstract;
     using WsSubmitters;
     using WsSubmitters.Abstract;
-    using WebSocketContext = WsFalcon.WebSocketContext;
+    using WebSocketContext = WebSocketContext;
 
     public class WsClients : IWsClients
     {
@@ -16,6 +16,7 @@ namespace WsFalcon.WsHandlers
         private readonly WebSocketContext _webSocketContext;
         private readonly ISerializer _serializer;
         private readonly CallerSubmitter _callerSubmitter;
+        private readonly OtherSubmitterBase _otherSubmitterBase;
 
         public WsClients(
             IWsSessionsManager wsSessionsManager,
@@ -30,11 +31,14 @@ namespace WsFalcon.WsHandlers
             _serializer = serializer;
             _broadcastClientSubmitter = new BroadcastClientSubmitter(wsSessionsManager, serializer, webSocketContext);
             _callerSubmitter = new CallerSubmitter(serializer, webSocketContext, callerWs);
+            _otherSubmitterBase = new OtherSubmitterBase(serializer, webSocketContext, wsSessionsManager);
         }
 
         public IWsClientSubmitter All => _broadcastClientSubmitter;
 
         public IWsClientSubmitter Caller => _callerSubmitter;
+
+        public IWsClientSubmitter Other => _otherSubmitterBase;
 
         public IWsClientSubmitter Group(string groupName)
         {

@@ -8,7 +8,7 @@ namespace WsFalcon.WsHandlers.WsSubmitters
     using Serializers.Abstract;
     using WebSocketContext = WebSocketContext;
 
-    public class GroupClientSubmitter : WsSubmitter
+    public class GroupClientSubmitter : WsSubmitterBase
     {
         private readonly string _groupName;
         private readonly IWsSessionsManager _wsSessionsManager;
