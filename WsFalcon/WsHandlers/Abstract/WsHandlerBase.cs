@@ -24,8 +24,14 @@ namespace WsFalcon.WsHandlers.Abstract
         /// </summary>
         public ISerializer Serializer { get; set; } = null!;
 
+        /// <summary>
+        /// Gets group manager.
+        /// </summary>
         public IGroupManager Group { get; internal set; } = null!;
 
+        /// <summary>
+        /// Gets an object that can be used to invoke methods on the clients connected to this hub.
+        /// </summary>
         public IWsClients Clients { get; internal set; } = null!;
 
         /// <summary>

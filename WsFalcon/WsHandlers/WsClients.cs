@@ -34,15 +34,19 @@ namespace WsFalcon.WsHandlers
             _otherSubmitterBase = new OtherSubmitterBase(serializer, webSocketContext, wsSessionsManager);
         }
 
+        /// <inheritdoc />
         public IWsClientSubmitter All => _broadcastClientSubmitter;
 
+        /// <inheritdoc />
         public IWsClientSubmitter Caller => _callerSubmitter;
 
+        /// <inheritdoc />
         public IWsClientSubmitter Other => _otherSubmitterBase;
 
+        /// <inheritdoc />
         public IWsClientSubmitter Group(string groupName)
         {
-            return new GroupClientSubmitter(groupName, _wsSessionsManager, _wsGroupManager, _serializer, _webSocketContext);
+            return new GroupClientSubmitter(groupName, _wsSessionsManager, _wsGroupManager, _serializer, _webSocketContext); // TODO: maybe need optimization here.
         }
     }
 }
